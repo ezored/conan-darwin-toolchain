@@ -1,0 +1,19 @@
+os: osx
+language: generic
+osx_image: xcode9.3
+env:
+   global:
+     - CONAN_REFERENCE: "darwin-toolchain/1.0.0"
+     - CONAN_USERNAME: "ezored"
+     - CONAN_LOGIN_USERNAME: "ezored"
+     - CONAN_CHANNEL: "testing"
+     - CONAN_UPLOAD: "https://api.bintray.com/conan/ezored/conan-repo"
+     - CONAN_STABLE_BRANCH_PATTERN: "release/*"
+
+install:
+  - chmod +x .travis/install.sh
+  - ./.travis/install.sh
+
+script:
+  - chmod +x .travis/run.sh
+  - ./.travis/run.sh
