@@ -7,7 +7,7 @@ env:
      - CONAN_USERNAME: "ezored"
      - CONAN_LOGIN_USERNAME: "prsolucoes"
      - CONAN_CHANNEL: "stable"
-     - CONAN_UPLOAD: "https://api.bintray.com/conan/ezored/conan-repo"
+     - CONAN_UPLOAD: "https://api.bintray.com/conan/ezored/darwin-toolchain"
      - CONAN_STABLE_BRANCH_PATTERN: "stable/*"
      - CONAN_UPLOAD_ONLY_WHEN_STABLE: 1
 
