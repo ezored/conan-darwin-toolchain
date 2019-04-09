@@ -6,8 +6,7 @@ set -x
 if [[ "$(uname -s)" == 'Darwin' ]]; then
     brew update || brew update
     brew outdated pyenv || brew upgrade pyenv
-    brew install pyenv-virtualenv
-    brew install cmake || brew upgrade cmake
+    brew install pyenv-virtualenv    
 
     if which pyenv > /dev/null; then
         eval "$(pyenv init -)"
