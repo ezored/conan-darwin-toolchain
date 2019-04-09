@@ -5,10 +5,11 @@ env:
    global:
      - CONAN_REFERENCE: "darwin-toolchain/1.0.0"
      - CONAN_USERNAME: "ezored"
-     - CONAN_LOGIN_USERNAME: "prsolucoes"
-     - CONAN_CHANNEL: "testing"
+     - CONAN_LOGIN_USERNAME: "ezored"
+     - CONAN_CHANNEL: "stable"
      - CONAN_UPLOAD: "https://api.bintray.com/conan/ezored/conan-repo"
-     - CONAN_STABLE_BRANCH_PATTERN: "release/*"
+     - CONAN_STABLE_BRANCH_PATTERN: "stable/*"
+     - CONAN_UPLOAD_ONLY_WHEN_STABLE: 1
 
 install:
   - chmod +x .ci/install.sh
