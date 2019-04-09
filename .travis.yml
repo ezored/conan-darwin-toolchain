@@ -11,9 +11,9 @@ env:
      - CONAN_STABLE_BRANCH_PATTERN: "release/*"
 
 install:
-  - chmod +x .travis/install.sh
+  - chmod +x .ci/install.sh
   - ./.ci/install.sh
 
 script:
-  - chmod +x .travis/run.sh
+  - chmod +x .ci/run.sh
   - ./.ci/run.sh
