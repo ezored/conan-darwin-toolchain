@@ -12,8 +12,8 @@ env:
 
 install:
   - chmod +x .travis/install.sh
-  - ./.travis/install.sh
+  - ./.ci/install.sh
 
 script:
   - chmod +x .travis/run.sh
-  - ./.travis/run.sh
+  - ./.ci/run.sh
