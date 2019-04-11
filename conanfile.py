@@ -118,7 +118,12 @@ class DarwinToolchainConan(ConanFile):
                 self.package_folder, "darwin-macos-toolchain.cmake"
             )
         else:
-            self.env_info.CONAN_CMAKE_OSX_ARCHITECTURES = str(darwin_arch)
+            if self.settings.get_safe("os.version"):
+                self.env_info.DEPLOYMENT_TARGET = str(
+                    self.settings.os.version
+                )
+
+            self.env_info.OSX_ARCHITECTURES = str(darwin_arch)
 
             self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = os.path.join(
                 self.package_folder, "darwin-ios-toolchain.cmake"
