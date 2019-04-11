@@ -120,6 +120,38 @@
 # *****************************************************************************
 #
 
+######## CONAN
+if(DEFINED ENV{CONAN_CMAKE_DEPLOYMENT_TARGET})
+  set(DEPLOYMENT_TARGET "$ENV{CONAN_CMAKE_DEPLOYMENT_TARGET}")
+  message(STATUS "Conan defined variable DEPLOYMENT_TARGET: ${DEPLOYMENT_TARGET}")
+endif()
+
+if(DEFINED ENV{CONAN_CMAKE_ARCH})
+  set(ARCHS "$ENV{CONAN_CMAKE_ARCH}")
+  message(STATUS "Conan defined variable ARCHS: ${ARCHS}")
+endif()
+
+if(DEFINED ENV{CONAN_CMAKE_PLATFORM})
+  set(PLATFORM "$ENV{CONAN_CMAKE_PLATFORM}")
+  message(STATUS "Conan defined variable PLATFORM: ${PLATFORM}")
+endif()
+
+if(DEFINED ENV{CONAN_CMAKE_ENABLE_BITCODE})
+  set(ENABLE_BITCODE "$ENV{CONAN_CMAKE_ENABLE_BITCODE}")
+  message(STATUS "Conan defined variable ENABLE_BITCODE: ${ENABLE_BITCODE}")
+endif()
+
+if(DEFINED ENV{CONAN_CMAKE_ENABLE_ARC})
+  set(ENABLE_ARC "$ENV{CONAN_CMAKE_ENABLE_ARC}")
+  message(STATUS "Conan defined variable ENABLE_ARC: ${ENABLE_ARC}")
+endif()
+
+if(DEFINED ENV{CONAN_CMAKE_ENABLE_VISIBILITY})
+  set(ENABLE_VISIBILITY "$ENV{CONAN_CMAKE_ENABLE_VISIBILITY}")
+  message(STATUS "Conan defined variable ENABLE_VISIBILITY: ${ENABLE_VISIBILITY}")
+endif()
+######## END CONAN
+
 # Fix for PThread library not in path
 set(CMAKE_THREAD_LIBS_INIT "-lpthread")
 set(CMAKE_HAVE_THREADS_LIBRARY 1)
@@ -152,7 +184,7 @@ endif()
 
 if(DEFINED IOS_DEPLOYMENT_TARGET)
   set(DEPLOYMENT_TARGET ${IOS_DEPLOYMENT_TARGET})
-  message(DEPRECATION "CMAKE_IOS_DEVELOPER_ROOT argument is DEPRECATED. Consider using the new CMAKE_DEVELOPER_ROOT argument instead.")
+  message(DEPRECATION "IOS_DEPLOYMENT_TARGET argument is DEPRECATED. Consider using the new DEPLOYMENT_TARGET argument instead.")
 endif()
 
 if(DEFINED CMAKE_IOS_DEVELOPER_ROOT)

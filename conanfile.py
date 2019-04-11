@@ -10,8 +10,16 @@ class DarwinToolchainConan(ConanFile):
     version = "1.0.0"
     license = "Apple"
     settings = "os", "arch", "build_type"
-    options = {"bitcode": [True, False]}
-    default_options = "bitcode=True"
+    options = {
+        "enable_bitcode": [True, False],
+        "enable_arc": [True, False],
+        "enable_visibility": [True, False],
+    }
+    default_options = {
+        "enable_bitcode": True,
+        "enable_arc": True,
+        "enable_visibility": False,
+    }
     description = "Darwin toolchain to (cross) compile macOS/iOS/watchOS/tvOS"
     url = "https://github.com/ezored/conan-darwin-tooolchain"
     build_policy = "missing"
@@ -24,10 +32,11 @@ class DarwinToolchainConan(ConanFile):
         return str(self.settings.os)
 
     def config_options(self):
-        # build_type is only useful for bitcode
+        # remove unsed options on Macos
         if self.settings.os == "Macos":
-            del self.settings.build_type
-            del self.options.bitcode
+            del self.options.enable_bitcode
+            del self.options.enable_arc
+            del self.options.enable_visibility
 
     def configure(self):
         if platform.system() != "Darwin":
@@ -36,7 +45,7 @@ class DarwinToolchainConan(ConanFile):
         if not tools.is_apple_os(self.settings.os):
             raise Exception("OS must be an Apple OS")
 
-        if self.settings.os in ["watchOS", "tvOS"] and not self.options.bitcode:
+        if self.settings.os in ["watchOS", "tvOS"] and not self.options.enable_bitcode:
             raise Exception("Bitcode is required on watchOS/tvOS")
 
         if self.settings.os == "Macos" and self.settings.arch not in ["x86", "x86_64"]:
@@ -54,9 +63,9 @@ class DarwinToolchainConan(ConanFile):
                 "tvOS: Only supported archs: [armv8, x86_64]"
             )
 
-        if self.settings.os == "watchOS" and self.settings.arch not in ["armv7k", "armv8", "x86", "x86_64"]:
+        if self.settings.os == "watchOS" and self.settings.arch not in ["armv7k", "armv8_32", "x86", "x86_64"]:
             raise Exception(
-                "watchOS: Only supported archs: [armv7k, armv8, x86, x86_64]"
+                "watchOS: Only supported archs: [armv7k, armv8_32, x86, x86_64]"
             )
 
     def package(self):
@@ -108,26 +117,66 @@ class DarwinToolchainConan(ConanFile):
             self.env_info.CONAN_CMAKE_SYSTEM_NAME = self.cmake_system_name
 
             if self.settings.get_safe("os.version"):
-                self.env_info.CONAN_CMAKE_OSX_DEPLOYMENT_TARGET = str(
+                self.env_info.CONAN_CMAKE_DEPLOYMENT_TARGET = str(
                     self.settings.os.version
                 )
 
-            self.env_info.CONAN_CMAKE_OSX_ARCHITECTURES = str(darwin_arch)
+            self.env_info.CONAN_CMAKE_ARCH = str(darwin_arch)
             self.env_info.CONAN_CMAKE_SYSROOT = sysroot
             self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = os.path.join(
                 self.package_folder, "darwin-macos-toolchain.cmake"
             )
         else:
             if self.settings.get_safe("os.version"):
-                self.env_info.DEPLOYMENT_TARGET = str(
+                self.env_info.CONAN_CMAKE_DEPLOYMENT_TARGET = str(
                     self.settings.os.version
                 )
 
-            self.env_info.OSX_ARCHITECTURES = str(darwin_arch)
+            self.env_info.CONAN_CMAKE_ARCH = str(darwin_arch)
+            self.env_info.CONAN_CMAKE_PLATFORM = self._os_to_platform()
 
             self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = os.path.join(
                 self.package_folder, "darwin-ios-toolchain.cmake"
             )
 
+            self.env_info.CONAN_CMAKE_ENABLE_BITCODE = self._bool_to_int(
+                self.options.enable_bitcode
+            )
+
+            self.env_info.CONAN_CMAKE_ENABLE_ARC = self._bool_to_int(
+                self.options.enable_arc
+            )
+
+            self.env_info.CONAN_CMAKE_ENABLE_VISIBILITY = self._bool_to_int(
+                self.options.enable_visibility
+            )
+
     def package_id(self):
         self.info.header_only()
+
+    def _bool_to_int(self, value):
+        return 1 if value == True else 0
+
+    def _os_to_platform(self):
+        if self.settings.os == "iOS" and self.settings.arch in ["armv7", "armv7s", "armv8", "armv8.3"]:
+            return 'OS'
+
+        if self.settings.os == "iOS" and self.settings.arch in ["x86"]:
+            return 'SIMULATOR'
+
+        if self.settings.os == "iOS" and self.settings.arch in ["x86_64"]:
+            return 'SIMULATOR64'
+
+        if self.settings.os == "tvOS" and self.settings.arch in ["armv8"]:
+            return 'TVOS'
+
+        if self.settings.os == "tvOS" and self.settings.arch in ["x86_64"]:
+            return 'SIMULATOR_TVOS'
+
+        if self.settings.os == "watchOS" and self.settings.arch in ["armv7k", "armv8_32"]:
+            return 'WATCHOS'
+
+        if self.settings.os == "watchOS" and self.settings.arch in ["x86", "x86_64"]:
+            return 'SIMULATOR_WATCHOS'
+
+        raise Exception("Invalid OS")
