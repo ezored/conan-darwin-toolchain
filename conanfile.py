@@ -141,23 +141,23 @@ class DarwinToolchainConan(ConanFile):
                 self.package_folder, "darwin-ios-toolchain.cmake"
             )
 
-            self.env_info.CONAN_CMAKE_ENABLE_BITCODE = self._bool_to_int(
+            self.env_info.CONAN_CMAKE_ENABLE_BITCODE = self._bool_to_str(
                 self.options.enable_bitcode
             )
 
-            self.env_info.CONAN_CMAKE_ENABLE_ARC = self._bool_to_int(
+            self.env_info.CONAN_CMAKE_ENABLE_ARC = self._bool_to_str(
                 self.options.enable_arc
             )
 
-            self.env_info.CONAN_CMAKE_ENABLE_VISIBILITY = self._bool_to_int(
+            self.env_info.CONAN_CMAKE_ENABLE_VISIBILITY = self._bool_to_str(
                 self.options.enable_visibility
             )
 
     def package_id(self):
         self.info.header_only()
 
-    def _bool_to_int(self, value):
-        return 1 if value == True else 0
+    def _bool_to_str(self, value):
+        return "1" if value == True else "0"
 
     def _os_to_platform(self):
         if self.settings.os == "iOS" and self.settings.arch in ["armv7", "armv7s", "armv8", "armv8.3"]:
