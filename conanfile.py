@@ -1,4 +1,5 @@
 from conans import ConanFile, tools
+from conans.errors import ConanInvalidConfiguration
 
 import os
 import platform
@@ -40,31 +41,32 @@ class DarwinToolchainConan(ConanFile):
 
     def configure(self):
         if platform.system() != "Darwin":
-            raise Exception("Build machine must be macOS")
+            raise ConanInvalidConfiguration("Build machine must be macOS")
 
         if not tools.is_apple_os(self.settings.os):
-            raise Exception("OS must be an Apple OS")
+            raise ConanInvalidConfiguration("OS must be an Apple OS")
 
         if self.settings.os in ["watchOS", "tvOS"] and not self.options.enable_bitcode:
-            raise Exception("Bitcode is required on watchOS/tvOS")
+            raise ConanInvalidConfiguration(
+                "Bitcode is required on watchOS/tvOS")
 
         if self.settings.os == "Macos" and self.settings.arch not in ["x86", "x86_64"]:
-            raise Exception(
+            raise ConanInvalidConfiguration(
                 "macOS: Only supported archs: [x86, x86_64]"
             )
 
         if self.settings.os == "iOS" and self.settings.arch not in ["armv7", "armv7s", "armv8", "armv8.3", "x86", "x86_64"]:
-            raise Exception(
+            raise ConanInvalidConfiguration(
                 "iOS: Only supported archs: [armv7, armv7s, armv8, armv8.3, x86, x86_64]"
             )
 
         if self.settings.os == "tvOS" and self.settings.arch not in ["armv8", "x86_64"]:
-            raise Exception(
+            raise ConanInvalidConfiguration(
                 "tvOS: Only supported archs: [armv8, x86_64]"
             )
 
         if self.settings.os == "watchOS" and self.settings.arch not in ["armv7k", "armv8_32", "x86", "x86_64"]:
-            raise Exception(
+            raise ConanInvalidConfiguration(
                 "watchOS: Only supported archs: [armv7k, armv8_32, x86, x86_64]"
             )
 
@@ -139,23 +141,23 @@ class DarwinToolchainConan(ConanFile):
                 self.package_folder, "darwin-ios-toolchain.cmake"
             )
 
-            self.env_info.CONAN_CMAKE_ENABLE_BITCODE = self._bool_to_int(
+            self.env_info.CONAN_CMAKE_ENABLE_BITCODE = self._bool_to_str(
                 self.options.enable_bitcode
             )
 
-            self.env_info.CONAN_CMAKE_ENABLE_ARC = self._bool_to_int(
+            self.env_info.CONAN_CMAKE_ENABLE_ARC = self._bool_to_str(
                 self.options.enable_arc
             )
 
-            self.env_info.CONAN_CMAKE_ENABLE_VISIBILITY = self._bool_to_int(
+            self.env_info.CONAN_CMAKE_ENABLE_VISIBILITY = self._bool_to_str(
                 self.options.enable_visibility
             )
 
     def package_id(self):
         self.info.header_only()
 
-    def _bool_to_int(self, value):
-        return 1 if value == True else 0
+    def _bool_to_str(self, value):
+        return "1" if value == True else "0"
 
     def _os_to_platform(self):
         if self.settings.os == "iOS" and self.settings.arch in ["armv7", "armv7s", "armv8", "armv8.3"]:
