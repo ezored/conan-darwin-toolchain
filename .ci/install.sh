@@ -6,6 +6,7 @@ if [[ "$(uname -s)" == 'Darwin' ]]; then
     brew update || brew update
     brew outdated pyenv || brew upgrade pyenv
     brew install pyenv-virtualenv
+    brew install zlib
     
     if ! type "cmake" > /dev/null; then
         brew install cmake
