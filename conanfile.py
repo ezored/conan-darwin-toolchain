@@ -12,14 +12,14 @@ class DarwinToolchainConan(ConanFile):
     license = "Apple"
     settings = "os", "arch", "build_type"
     options = {
-        "enable_bitcode": [True, False],
-        "enable_arc": [True, False],
-        "enable_visibility": [True, False],
+        "enable_bitcode": [True, False, None],
+        "enable_arc": [True, False, None],
+        "enable_visibility": [True, False, None],
     }
     default_options = {
-        "enable_bitcode": True,
-        "enable_arc": True,
-        "enable_visibility": False,
+        "enable_bitcode": None,
+        "enable_arc": None,
+        "enable_visibility": None,
     }
     description = "Darwin toolchain to (cross) compile macOS/iOS/watchOS/tvOS"
     url = "https://github.com/ezored/conan-darwin-tooolchain"
@@ -35,9 +35,7 @@ class DarwinToolchainConan(ConanFile):
     def config_options(self):
         # remove unsed options on Macos
         if self.settings.os == "Macos":
-            del self.options.enable_bitcode
-            del self.options.enable_arc
-            del self.options.enable_visibility
+            self.options.enable_bitcode = None
 
     def configure(self):
         if platform.system() != "Darwin":
@@ -71,8 +69,7 @@ class DarwinToolchainConan(ConanFile):
             )
 
     def package(self):
-        self.copy("darwin-macos-toolchain.cmake")
-        self.copy("darwin-ios-toolchain.cmake")
+        self.copy("darwin-toolchain.cmake")
 
     def package_info(self):
         darwin_arch = tools.to_apple_arch(self.settings.arch)
@@ -89,6 +86,33 @@ class DarwinToolchainConan(ConanFile):
             common_flags.append(tools.apple_deployment_target_flag(
                 self.settings.os, self.settings.os.version)
             )
+
+        # Bitcode
+        if self.options.enable_bitcode is not None:
+            if not self.settings.os == "Macos" and self.options.enable_bitcode:
+                if self.settings.build_type == "Debug":
+                    common_flags.append("-fembed-bitcode-marker")
+                    self.env_info.CMAKE_XCODE_ATTRIBUTE_BITCODE_GENERATION_MODE = 'bitcode'
+                else:
+                    common_flags.append("-fembed-bitcode")
+                    self.env_info.CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE = 'NO'
+
+        # ARC
+        if self.options.enable_arc is not None:
+            if self.options.enable_arc:
+                common_flags.append("-fobjc-arc")
+                self.env_info.CMAKE_XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC = 'YES'
+            else:
+                common_flags.append("-fno-objc-arc")
+                self.env_info.CMAKE_XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC = 'NO'
+
+        # Visibility
+        if self.options.enable_visibility is not None:
+            if self.options.enable_visibility:
+                self.env_info.CMAKE_XCODE_ATTRIBUTE_GCC_SYMBOLS_PRIVATE_EXTERN = 'NO'
+            else:
+                common_flags.append("-fvisibility=hidden")
+                self.env_info.CMAKE_XCODE_ATTRIBUTE_GCC_SYMBOLS_PRIVATE_EXTERN = 'YES'
 
         # CMake issue, for details look https://github.com/conan-io/conan/issues/2378
         cflags = copy.copy(common_flags)
@@ -127,58 +151,10 @@ class DarwinToolchainConan(ConanFile):
         self.env_info.CONAN_CMAKE_ARCH = str(darwin_arch)
         self.env_info.CONAN_CMAKE_SYSROOT = sysroot
 
-        # Specific options
-        if self.settings.os == "Macos":
-            # For macOS
-            self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = os.path.join(
-                self.package_folder, "darwin-macos-toolchain.cmake"
-            )
-        else:
-            # For iOS, tvOS, watchOS and their simulators
-            self.env_info.CONAN_CMAKE_PLATFORM = self._os_to_platform()
-
-            self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = os.path.join(
-                self.package_folder, "darwin-ios-toolchain.cmake"
-            )
-
-            self.env_info.CONAN_CMAKE_ENABLE_BITCODE = self._bool_to_str(
-                self.options.enable_bitcode
-            )
-
-            self.env_info.CONAN_CMAKE_ENABLE_ARC = self._bool_to_str(
-                self.options.enable_arc
-            )
-
-            self.env_info.CONAN_CMAKE_ENABLE_VISIBILITY = self._bool_to_str(
-                self.options.enable_visibility
-            )
+        # Toolchain
+        self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = os.path.join(
+            self.package_folder, "darwin-toolchain.cmake"
+        )
 
     def package_id(self):
         self.info.header_only()
-
-    def _bool_to_str(self, value):
-        return "1" if value == True else "0"
-
-    def _os_to_platform(self):
-        if self.settings.os == "iOS" and self.settings.arch in ["armv7", "armv7s", "armv8", "armv8.3"]:
-            return 'OS'
-
-        if self.settings.os == "iOS" and self.settings.arch in ["x86"]:
-            return 'SIMULATOR'
-
-        if self.settings.os == "iOS" and self.settings.arch in ["x86_64"]:
-            return 'SIMULATOR64'
-
-        if self.settings.os == "tvOS" and self.settings.arch in ["armv8"]:
-            return 'TVOS'
-
-        if self.settings.os == "tvOS" and self.settings.arch in ["x86_64"]:
-            return 'SIMULATOR_TVOS'
-
-        if self.settings.os == "watchOS" and self.settings.arch in ["armv7k", "armv8_32"]:
-            return 'WATCHOS'
-
-        if self.settings.os == "watchOS" and self.settings.arch in ["x86", "x86_64"]:
-            return 'SIMULATOR_WATCHOS'
-
-        raise Exception("Invalid OS")
