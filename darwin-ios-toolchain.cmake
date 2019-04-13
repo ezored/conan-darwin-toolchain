@@ -634,9 +634,9 @@ set(CMAKE_SYSTEM_FRAMEWORK_PATH
   ${CMAKE_OSX_SYSROOT}/System/Library/PrivateFrameworks
   ${CMAKE_OSX_SYSROOT}/Developer/Library/Frameworks)
 # Only search the specified iOS SDK, not the remainder of the host filesystem.
-set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM ONLY)
-set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
-set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM BOTH)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY BOTH)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE BOTH)
 
 #
 # Some helper-macros below to simplify and beautify the CMakeFile
