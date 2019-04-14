@@ -84,8 +84,8 @@ class DarwinToolchainConan(ConanFile):
 
         if self.settings.get_safe("os.version"):
             common_flags.append(tools.apple_deployment_target_flag(
-                self.settings.os, self.settings.os.version)
-            )
+                self.settings.os, self.settings.os.version
+            ))
 
         # Bitcode
         if self.options.enable_bitcode is not None:
@@ -144,11 +144,11 @@ class DarwinToolchainConan(ConanFile):
 
         # Deployment target
         if self.settings.get_safe("os.version"):
-            self.env_info.CONAN_CMAKE_DEPLOYMENT_TARGET = str(
+            self.env_info.CONAN_CMAKE_OSX_DEPLOYMENT_TARGET = str(
                 self.settings.os.version
             )
 
-        self.env_info.CONAN_CMAKE_ARCH = str(darwin_arch)
+        self.env_info.CONAN_CMAKE_OSX_ARCHITECTURES = str(darwin_arch)
         self.env_info.CONAN_CMAKE_SYSROOT = sysroot
 
         # Toolchain
