@@ -17,9 +17,9 @@ class DarwinToolchainConan(ConanFile):
         "enable_visibility": [True, False, None],
     }
     default_options = {
-        "enable_bitcode": None,
-        "enable_arc": None,
-        "enable_visibility": None,
+        "enable_bitcode": True,
+        "enable_arc": True,
+        "enable_visibility": False,
     }
     description = "Darwin toolchain to (cross) compile macOS/iOS/watchOS/tvOS"
     url = "https://github.com/ezored/conan-darwin-tooolchain"
