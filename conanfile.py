@@ -17,9 +17,9 @@ class DarwinToolchainConan(ConanFile):
         "enable_visibility": [True, False, None],
     }
     default_options = {
-        "enable_bitcode": True,
-        "enable_arc": True,
-        "enable_visibility": False,
+        "enable_bitcode": None,
+        "enable_arc": None,
+        "enable_visibility": None,
     }
     description = "Darwin toolchain to (cross) compile macOS/iOS/watchOS/tvOS"
     url = "https://github.com/ezored/conan-darwin-tooolchain"
@@ -33,9 +33,14 @@ class DarwinToolchainConan(ConanFile):
         return str(self.settings.os)
 
     def config_options(self):
-        # remove unsed options on Macos
         if self.settings.os == "Macos":
             self.options.enable_bitcode = None
+
+        if self.settings.os == "watchOS":
+            self.options.enable_bitcode = True
+
+        if self.settings.os == "tvOS":
+            self.options.enable_bitcode = True
 
     def configure(self):
         if platform.system() != "Darwin":
