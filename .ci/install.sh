@@ -9,12 +9,6 @@ if [[ "$(uname -s)" == 'Darwin' ]]; then
     brew install zlib
     brew install sqlite
     
-    if ! type "cmake" > /dev/null; then
-        brew install cmake
-    else
-        brew upgrade cmake
-    fi
-
     if which pyenv > /dev/null; then
         eval "$(pyenv init -)"
     fi
