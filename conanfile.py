@@ -93,8 +93,10 @@ class DarwinToolchainConan(ConanFile):
             ))
 
         # Bitcode
-        if self.options.enable_bitcode is not None:
-            if not self.settings.os == "Macos" and self.options.enable_bitcode:
+        if self.options.enable_bitcode == 'None':
+            self.output.info('Bitcode enabled: IGNORED')
+        else:
+            if self.options.enable_bitcode:
                 if self.settings.build_type == "Debug":
                     common_flags.append("-fembed-bitcode-marker")
                     self.env_info.CMAKE_XCODE_ATTRIBUTE_BITCODE_GENERATION_MODE = 'bitcode'
@@ -103,11 +105,11 @@ class DarwinToolchainConan(ConanFile):
                     common_flags.append("-fembed-bitcode")
                     self.env_info.CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE = 'NO'
                     self.output.info('Bitcode enabled: YES')
-        else:
-            self.output.info('Bitcode enabled was ignored')
 
         # ARC
-        if self.options.enable_arc is not None:
+        if self.options.enable_arc == 'None':
+            self.output.info('ObjC ARC enabled: IGNORED')
+        else:
             if self.options.enable_arc:
                 common_flags.append("-fobjc-arc")
                 self.env_info.CMAKE_XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC = 'YES'
@@ -116,11 +118,11 @@ class DarwinToolchainConan(ConanFile):
                 common_flags.append("-fno-objc-arc")
                 self.env_info.CMAKE_XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC = 'NO'
                 self.output.info('ObjC ARC enabled: NO')
-        else:
-            self.output.info('ObjC ARC enabled was ignored')
 
         # Visibility
-        if self.options.enable_visibility is not None:
+        if self.options.enable_visibility == 'None':
+            self.output.info('Visibility enabled: IGNORED')
+        else:
             if self.options.enable_visibility:
                 self.env_info.CMAKE_XCODE_ATTRIBUTE_GCC_SYMBOLS_PRIVATE_EXTERN = 'NO'
                 self.output.info('Visibility enabled: YES')
@@ -128,8 +130,6 @@ class DarwinToolchainConan(ConanFile):
                 common_flags.append("-fvisibility=hidden")
                 self.env_info.CMAKE_XCODE_ATTRIBUTE_GCC_SYMBOLS_PRIVATE_EXTERN = 'YES'
                 self.output.info('Visibility enabled: NO')
-        else:
-            self.output.info('Visibility enabled was ignored')
 
         # CMake issue, for details look https://github.com/conan-io/conan/issues/2378
         cflags = copy.copy(common_flags)
@@ -165,7 +165,9 @@ class DarwinToolchainConan(ConanFile):
                 self.settings.os.version
             )
 
-            self.output.info('Deployment target: {0}'.format(str(self.settings.os.version)))
+            self.output.info('Deployment target: {0}'.format(
+                str(self.settings.os.version)
+            ))
 
         self.env_info.CONAN_CMAKE_OSX_ARCHITECTURES = str(darwin_arch)
         self.output.info('Architecture: {0}'.format(str(darwin_arch)))
