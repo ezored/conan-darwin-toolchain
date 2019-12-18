@@ -58,3 +58,16 @@ Bitcode is an option available on iOS, it is **required** on tvOS/watchOS.
 It is set by default to `True`.
 
 So you can only set it to `False` for iOS. Note that it is not defined for macOS.
+
+## Local development
+
+1. Install python packages:  
+```pip install conan_package_tools bincrafters_package_tools```
+2. Clone the project:  
+```git clone https://github.com/ezored/conan-darwin-toolchain.git```
+3. Enter on project folder:  
+```cd conan-darwin-toolchain```
+3. Install:  
+```conan create . ezored/stable```
+4. Build:  
+```python build.py```

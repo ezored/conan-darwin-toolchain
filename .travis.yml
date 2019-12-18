@@ -1,6 +1,6 @@
 os: osx
 language: generic
-osx_image: xcode10.2
+osx_image: xcode11.2
 env:
    global:
      - CONAN_REFERENCE: "darwin-toolchain/1.0.0"

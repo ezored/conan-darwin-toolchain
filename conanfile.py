@@ -15,11 +15,13 @@ class DarwinToolchainConan(ConanFile):
         "enable_bitcode": [True, False, None],
         "enable_arc": [True, False, None],
         "enable_visibility": [True, False, None],
+        "catalyst": [True, False],
     }
     default_options = {
         "enable_bitcode": None,
         "enable_arc": None,
         "enable_visibility": None,
+        "catalyst": False,
     }
     description = "Darwin toolchain to (cross) compile macOS/iOS/watchOS/tvOS"
     url = "https://github.com/ezored/conan-darwin-tooolchain"
@@ -78,6 +80,14 @@ class DarwinToolchainConan(ConanFile):
 
     def package_info(self):
         darwin_arch = tools.to_apple_arch(self.settings.arch)
+
+        if self.options.catalyst == True:
+            self.output.info('Catalyst enabled: YES')
+
+            if darwin_arch == 'x86_64':
+                darwin_arch = 'x86_64h'
+        else:
+            self.output.info('Catalyst enabled: NO')
 
         # common things
         xcrun = tools.XCRun(self.settings)

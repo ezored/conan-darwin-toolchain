@@ -7,4 +7,5 @@ if __name__ == "__main__":
     builder.add(settings={"os": "iOS", "os.version": "9.0"})
     builder.add(settings={"os": "watchOS", "os.version": "4.0"})
     builder.add(settings={"os": "tvOS", "os.version": "11.0"})
+    builder.add(settings={"os": "iOS", "os.version": "13.0", "arch": "x86_64"}, options={"darwin-toolchain:catalyst": True})
     builder.run()
