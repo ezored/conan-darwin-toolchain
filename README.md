@@ -24,7 +24,7 @@ os.version=9.0
 arch=armv7
 
 [build_requires]
-darwin-toolchain/1.0.0@ezored/stable
+darwin-toolchain/1.1.0@ezored/stable
 ```
     
 Go to your project and cross-build your dependency tree with this toolchain:
@@ -48,7 +48,7 @@ os.version=4.0
 arch=armv7
 
 [build_requires]
-darwin-toolchain/1.0.0@ezored/stable
+darwin-toolchain/1.1.0@ezored/stable
 ```
 
 ## Bitcode support
