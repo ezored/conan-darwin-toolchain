@@ -71,3 +71,5 @@ So you can only set it to `False` for iOS. Note that it is not defined for macOS
 ```conan create . ezored/stable```
 4. Build:  
 ```python build.py```
+5. To install it as local package:  
+```conan export-pkg . darwin-toolchain/1.1.0@ezored/stable```

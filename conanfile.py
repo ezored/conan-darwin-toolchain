@@ -60,9 +60,9 @@ class DarwinToolchainConan(ConanFile):
                 "macOS: Only supported archs: [x86, x86_64]"
             )
 
-        if self.settings.os == "iOS" and self.settings.arch not in ["armv7", "armv7s", "armv8", "armv8.3", "x86", "x86_64"]:
+        if self.settings.os == "iOS" and self.settings.arch not in ["armv7", "armv7s", "armv8", "armv8.3", "x86", "x86_64", "x86_64h"]:
             raise ConanInvalidConfiguration(
-                "iOS: Only supported archs: [armv7, armv7s, armv8, armv8.3, x86, x86_64]"
+                "iOS: Only supported archs: [armv7, armv7s, armv8, armv8.3, x86, x86_64, x86_64h]"
             )
 
         if self.settings.os == "tvOS" and self.settings.arch not in ["armv8", "x86_64"]:
@@ -80,27 +80,33 @@ class DarwinToolchainConan(ConanFile):
 
     def package_info(self):
         darwin_arch = tools.to_apple_arch(self.settings.arch)
+        xcrun_sdk_name = None
+        common_flag_target = None
 
         if self.options.catalyst == True:
             self.output.info('Catalyst enabled: YES')
 
-            if darwin_arch == 'x86_64':
-                darwin_arch = 'x86_64h'
+            xcrun_sdk_name = 'macosx'
+            common_flag_target = 'x86_64-apple-ios13.0-macabi'    
         else:
             self.output.info('Catalyst enabled: NO')
 
         # common things
-        xcrun = tools.XCRun(self.settings)
+        xcrun = tools.XCRun(self.settings, sdk=xcrun_sdk_name)
         sysroot = xcrun.sdk_path
 
         self.cpp_info.sysroot = sysroot
 
         common_flags = ["-isysroot%s" % sysroot]
 
-        if self.settings.get_safe("os.version"):
-            common_flags.append(tools.apple_deployment_target_flag(
-                self.settings.os, self.settings.os.version
-            ))
+        if common_flag_target:
+            common_flags.append("-target %s" % common_flag_target)
+
+        if self.options.catalyst is not True:
+            if self.settings.get_safe("os.version"):
+                common_flags.append(tools.apple_deployment_target_flag(
+                    self.settings.os, self.settings.os.version
+                ))
 
         # Bitcode
         if self.options.enable_bitcode == 'None':
@@ -170,14 +176,15 @@ class DarwinToolchainConan(ConanFile):
         self.env_info.CONAN_CMAKE_SYSTEM_NAME = self.cmake_system_name
 
         # Deployment target
-        if self.settings.get_safe("os.version"):
-            self.env_info.CONAN_CMAKE_OSX_DEPLOYMENT_TARGET = str(
-                self.settings.os.version
-            )
+        if self.options.catalyst is not True:
+            if self.settings.get_safe("os.version"):
+                self.env_info.CONAN_CMAKE_OSX_DEPLOYMENT_TARGET = str(
+                    self.settings.os.version
+                )
 
-            self.output.info('Deployment target: {0}'.format(
-                str(self.settings.os.version)
-            ))
+                self.output.info('Deployment target: {0}'.format(
+                    str(self.settings.os.version)
+                ))
 
         self.env_info.CONAN_CMAKE_OSX_ARCHITECTURES = str(darwin_arch)
         self.output.info('Architecture: {0}'.format(str(darwin_arch)))
