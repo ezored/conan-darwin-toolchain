@@ -184,8 +184,8 @@ class DarwinToolchainConan(ConanFile):
             cflags.extend(["-target", "x86_64-apple-ios-macabi"])
             cflags.extend(["-miphoneos-version-min=%s" % "13.0"])
 
-            link_flags.append("-target %s" % "x86_64-apple-ios-macabi")
-            link_flags.append("-miphoneos-version-min=%s" % "13.0")
+            link_flags.extend(["-target", "x86_64-apple-ios-macabi"])
+            link_flags.extend(["-miphoneos-version-min=%s" % "13.0"])
 
         self.cpp_info.sharedlinkflags.extend(link_flags)
         self.cpp_info.exelinkflags.extend(link_flags)
@@ -222,6 +222,7 @@ class DarwinToolchainConan(ConanFile):
         self.env_info.CONAN_CMAKE_OSX_ARCHITECTURES = str(darwin_arch)
         self.output.info("Architecture: {0}".format(str(darwin_arch)))
 
+        # Sysroot
         self.env_info.CONAN_CMAKE_OSX_SYSROOT = sysroot
         self.output.info("Sysroot: {0}".format(sysroot))
 
