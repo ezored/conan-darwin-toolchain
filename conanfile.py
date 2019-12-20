@@ -34,6 +34,16 @@ class DarwinToolchainConan(ConanFile):
             return "macOS"
         return str(self.settings.os)
 
+    @property
+    def cmake_system_processor(self):
+        return {
+            "x86": "i386",
+            "x86_64": "x86_64",
+            "x86_64h": "x86_64h",
+            "armv7": "arm",
+            "armv8": "aarch64",
+        }.get(str(self.settings.arch))
+
     def config_options(self):
         if self.settings.os == "Macos":
             self.options.enable_bitcode = None
@@ -46,23 +56,33 @@ class DarwinToolchainConan(ConanFile):
 
     def configure(self):
         if platform.system() != "Darwin":
-            raise ConanInvalidConfiguration("Build machine must be macOS")
+            raise ConanInvalidConfiguration("Build machine must be Macos")
 
         if not tools.is_apple_os(self.settings.os):
             raise ConanInvalidConfiguration("OS must be an Apple OS")
 
         if self.settings.os in ["watchOS", "tvOS"] and not self.options.enable_bitcode:
-            raise ConanInvalidConfiguration(
-                "Bitcode is required on watchOS/tvOS")
+            raise ConanInvalidConfiguration("Bitcode is required on watchOS/tvOS")
 
-        if self.settings.os == "Macos" and self.settings.arch not in ["x86", "x86_64"]:
+        if self.settings.os == "Macos" and self.settings.arch not in [
+            "x86",
+            "x86_64",
+            "x86_64h",
+        ]:
             raise ConanInvalidConfiguration(
                 "macOS: Only supported archs: [x86, x86_64]"
             )
 
-        if self.settings.os == "iOS" and self.settings.arch not in ["armv7", "armv7s", "armv8", "armv8.3", "x86", "x86_64", "x86_64h"]:
+        if self.settings.os == "iOS" and self.settings.arch not in [
+            "armv7",
+            "armv7s",
+            "armv8",
+            "armv8.3",
+            "x86",
+            "x86_64",
+        ]:
             raise ConanInvalidConfiguration(
-                "iOS: Only supported archs: [armv7, armv7s, armv8, armv8.3, x86, x86_64, x86_64h]"
+                "iOS: Only supported archs: [armv7, armv7s, armv8, armv8.3, x86, x86_64]"
             )
 
         if self.settings.os == "tvOS" and self.settings.arch not in ["armv8", "x86_64"]:
@@ -70,7 +90,12 @@ class DarwinToolchainConan(ConanFile):
                 "tvOS: Only supported archs: [armv8, x86_64]"
             )
 
-        if self.settings.os == "watchOS" and self.settings.arch not in ["armv7k", "armv8_32", "x86", "x86_64"]:
+        if self.settings.os == "watchOS" and self.settings.arch not in [
+            "armv7k",
+            "armv8_32",
+            "x86",
+            "x86_64",
+        ]:
             raise ConanInvalidConfiguration(
                 "watchOS: Only supported archs: [armv7k, armv8_32, x86, x86_64]"
             )
@@ -80,79 +105,85 @@ class DarwinToolchainConan(ConanFile):
 
     def package_info(self):
         darwin_arch = tools.to_apple_arch(self.settings.arch)
-        xcrun_sdk_name = None
-        common_flag_target = None
+        print(darwin_arch)
 
         if self.options.catalyst == True:
-            self.output.info('Catalyst enabled: YES')
-
-            xcrun_sdk_name = 'macosx'
-            common_flag_target = 'x86_64-apple-ios13.0-macabi'    
+            self.output.info("Catalyst enabled: YES")
         else:
-            self.output.info('Catalyst enabled: NO')
+            self.output.info("Catalyst enabled: NO")
 
         # common things
-        xcrun = tools.XCRun(self.settings, sdk=xcrun_sdk_name)
+        xcrun = tools.XCRun(self.settings)
         sysroot = xcrun.sdk_path
 
         self.cpp_info.sysroot = sysroot
 
         common_flags = ["-isysroot%s" % sysroot]
 
-        if common_flag_target:
-            common_flags.append("-target %s" % common_flag_target)
-
-        if self.options.catalyst is not True:
+        if self.options.catalyst != True:
             if self.settings.get_safe("os.version"):
-                common_flags.append(tools.apple_deployment_target_flag(
+                deployment_target_flag = tools.apple_deployment_target_flag(
                     self.settings.os, self.settings.os.version
-                ))
+                )
+
+                self.output.info(
+                    "Deployment target: {0}".format(deployment_target_flag)
+                )
+
+                common_flags.append(deployment_target_flag)
 
         # Bitcode
-        if self.options.enable_bitcode == 'None':
-            self.output.info('Bitcode enabled: IGNORED')
+        if self.options.enable_bitcode == "None":
+            self.output.info("Bitcode enabled: IGNORED")
         else:
             if self.options.enable_bitcode:
                 if self.settings.build_type == "Debug":
                     common_flags.append("-fembed-bitcode-marker")
-                    self.env_info.CMAKE_XCODE_ATTRIBUTE_BITCODE_GENERATION_MODE = 'bitcode'
-                    self.output.info('Bitcode enabled: YES')
+                    self.env_info.CMAKE_XCODE_ATTRIBUTE_BITCODE_GENERATION_MODE = (
+                        "bitcode"
+                    )
+                    self.output.info("Bitcode enabled: YES")
                 else:
                     common_flags.append("-fembed-bitcode")
-                    self.env_info.CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE = 'NO'
-                    self.output.info('Bitcode enabled: YES')
+                    self.env_info.CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE = "NO"
+                    self.output.info("Bitcode enabled: YES")
 
         # ARC
-        if self.options.enable_arc == 'None':
-            self.output.info('ObjC ARC enabled: IGNORED')
+        if self.options.enable_arc == "None":
+            self.output.info("ObjC ARC enabled: IGNORED")
         else:
             if self.options.enable_arc:
                 common_flags.append("-fobjc-arc")
-                self.env_info.CMAKE_XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC = 'YES'
-                self.output.info('ObjC ARC enabled: YES')
+                self.env_info.CMAKE_XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC = "YES"
+                self.output.info("ObjC ARC enabled: YES")
             else:
                 common_flags.append("-fno-objc-arc")
-                self.env_info.CMAKE_XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC = 'NO'
-                self.output.info('ObjC ARC enabled: NO')
+                self.env_info.CMAKE_XCODE_ATTRIBUTE_CLANG_ENABLE_OBJC_ARC = "NO"
+                self.output.info("ObjC ARC enabled: NO")
 
         # Visibility
-        if self.options.enable_visibility == 'None':
-            self.output.info('Visibility enabled: IGNORED')
+        if self.options.enable_visibility == "None":
+            self.output.info("Visibility enabled: IGNORED")
         else:
             if self.options.enable_visibility:
-                self.env_info.CMAKE_XCODE_ATTRIBUTE_GCC_SYMBOLS_PRIVATE_EXTERN = 'NO'
-                self.output.info('Visibility enabled: YES')
+                self.env_info.CMAKE_XCODE_ATTRIBUTE_GCC_SYMBOLS_PRIVATE_EXTERN = "NO"
+                self.output.info("Visibility enabled: YES")
             else:
                 common_flags.append("-fvisibility=hidden")
-                self.env_info.CMAKE_XCODE_ATTRIBUTE_GCC_SYMBOLS_PRIVATE_EXTERN = 'YES'
-                self.output.info('Visibility enabled: NO')
+                self.env_info.CMAKE_XCODE_ATTRIBUTE_GCC_SYMBOLS_PRIVATE_EXTERN = "YES"
+                self.output.info("Visibility enabled: NO")
 
         # CMake issue, for details look https://github.com/conan-io/conan/issues/2378
         cflags = copy.copy(common_flags)
         cflags.extend(["-arch", darwin_arch])
+
         self.cpp_info.cflags = cflags
         link_flags = copy.copy(common_flags)
         link_flags.append("-arch %s" % darwin_arch)
+
+        if self.options.catalyst == True:
+            cflags.extend(["-target", "x86_64-apple-ios13.0-macabi"])
+            link_flags.append("-target %s" % "x86_64-apple-ios13.0-macabi")
 
         self.cpp_info.sharedlinkflags.extend(link_flags)
         self.cpp_info.exelinkflags.extend(link_flags)
@@ -176,23 +207,25 @@ class DarwinToolchainConan(ConanFile):
         self.env_info.CONAN_CMAKE_SYSTEM_NAME = self.cmake_system_name
 
         # Deployment target
-        if self.options.catalyst is not True:
+        if self.options.catalyst != True:
             if self.settings.get_safe("os.version"):
                 self.env_info.CONAN_CMAKE_OSX_DEPLOYMENT_TARGET = str(
                     self.settings.os.version
                 )
 
-                self.output.info('Deployment target: {0}'.format(
-                    str(self.settings.os.version)
-                ))
+                self.output.info(
+                    "CMake deployment target: {0}".format(str(self.settings.os.version))
+                )
 
         self.env_info.CONAN_CMAKE_OSX_ARCHITECTURES = str(darwin_arch)
-        self.output.info('Architecture: {0}'.format(str(darwin_arch)))
+        self.output.info("Architecture: {0}".format(str(darwin_arch)))
 
-        self.env_info.CONAN_CMAKE_SYSROOT = sysroot
-        self.output.info('Sysroot: {0}'.format(sysroot))
+        self.env_info.CONAN_CMAKE_OSX_SYSROOT = sysroot
+        self.output.info("Sysroot: {0}".format(sysroot))
 
         # Toolchain
+        self.env_info.CONAN_CMAKE_SYSTEM_PROCESSOR = self.cmake_system_processor
+
         self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = os.path.join(
             self.package_folder, "darwin-toolchain.cmake"
         )

@@ -1,7 +1,9 @@
 
 # conan-darwin-toolchain
 
-Build require to cross build to any darwin platform.
+[![Build Status](https://travis-ci.com/ezored/conan-darwin-toolchain.svg?branch=stable/1.1.0)](https://travis-ci.com/ezored/conan-darwin-toolchain)
+
+Toolchain required to cross build to any darwin platform.
 
 ## Setup
 
