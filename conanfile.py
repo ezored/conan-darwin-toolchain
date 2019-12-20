@@ -105,7 +105,6 @@ class DarwinToolchainConan(ConanFile):
 
     def package_info(self):
         darwin_arch = tools.to_apple_arch(self.settings.arch)
-        print(darwin_arch)
 
         if self.options.catalyst == True:
             self.output.info("Catalyst enabled: YES")
