@@ -182,8 +182,11 @@ class DarwinToolchainConan(ConanFile):
         link_flags.append("-arch %s" % darwin_arch)
 
         if self.options.catalyst == True:
-            cflags.extend(["-target", "x86_64-apple-ios13.0-macabi"])
-            link_flags.append("-target %s" % "x86_64-apple-ios13.0-macabi")
+            cflags.extend(["-target", "x86_64-apple-ios-macabi"])
+            cflags.extend(["-miphoneos-version-min=%s" % "13.0"])
+
+            link_flags.append("-target %s" % "x86_64-apple-ios-macabi")
+            link_flags.append("-miphoneos-version-min=%s" % "13.0")
 
         self.cpp_info.sharedlinkflags.extend(link_flags)
         self.cpp_info.exelinkflags.extend(link_flags)

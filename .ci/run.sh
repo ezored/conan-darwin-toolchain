@@ -10,3 +10,4 @@ if [[ "$(uname -s)" == 'Darwin' ]]; then
 fi
 
 python build.py
+find test_package/build -name hello -exec lipo -info {} \;
