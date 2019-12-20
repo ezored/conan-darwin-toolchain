@@ -111,7 +111,7 @@ class DarwinToolchainConan(ConanFile):
         else:
             self.output.info("Catalyst enabled: NO")
 
-        # common things
+        # Common things
         xcrun = tools.XCRun(self.settings)
         sysroot = xcrun.sdk_path
 
