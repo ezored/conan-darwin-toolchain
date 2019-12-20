@@ -69,11 +69,13 @@ So you can only set it to `False` for iOS. Note that it is not defined for macOS
 ```git clone https://github.com/ezored/conan-darwin-toolchain.git```
 3. Enter on project folder:  
 ```cd conan-darwin-toolchain```
-3. Install:  
+4. Install:  
 ```conan create . ezored/stable```
-4. Build:  
+5. Build:  
 ```python build.py```  
 or  
 ```rm -rf test_package/build/ && python build.py```  
-5. To install it as local package:  
+6. Check all generated files:  
+```find test_package/build -name hello -exec lipo -info {} \;```
+7. To install it as local package:  
 ```conan export-pkg . darwin-toolchain/1.1.0@ezored/stable```
