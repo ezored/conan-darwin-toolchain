@@ -15,13 +15,15 @@ class DarwinToolchainConan(ConanFile):
         "enable_bitcode": [True, False, None],
         "enable_arc": [True, False, None],
         "enable_visibility": [True, False, None],
-        "catalyst": [True, False],
+        "enable_catalyst": [True, False],
+        "catalyst_version": "ANY",
     }
     default_options = {
         "enable_bitcode": None,
         "enable_arc": None,
         "enable_visibility": None,
-        "catalyst": False,
+        "enable_catalyst": False,
+        "catalyst_version": "13.0",
     }
     description = "Darwin toolchain to (cross) compile macOS/iOS/watchOS/tvOS"
     url = "https://github.com/ezored/conan-darwin-tooolchain"
@@ -39,7 +41,6 @@ class DarwinToolchainConan(ConanFile):
         return {
             "x86": "i386",
             "x86_64": "x86_64",
-            "x86_64h": "x86_64h",
             "armv7": "arm",
             "armv8": "aarch64",
         }.get(str(self.settings.arch))
@@ -64,11 +65,7 @@ class DarwinToolchainConan(ConanFile):
         if self.settings.os in ["watchOS", "tvOS"] and not self.options.enable_bitcode:
             raise ConanInvalidConfiguration("Bitcode is required on watchOS/tvOS")
 
-        if self.settings.os == "Macos" and self.settings.arch not in [
-            "x86",
-            "x86_64",
-            "x86_64h",
-        ]:
+        if self.settings.os == "Macos" and self.settings.arch not in ["x86", "x86_64"]:
             raise ConanInvalidConfiguration(
                 "macOS: Only supported archs: [x86, x86_64]"
             )
@@ -106,7 +103,7 @@ class DarwinToolchainConan(ConanFile):
     def package_info(self):
         darwin_arch = tools.to_apple_arch(self.settings.arch)
 
-        if self.options.catalyst == True:
+        if self.options.enable_catalyst == True:
             self.output.info("Catalyst enabled: YES")
         else:
             self.output.info("Catalyst enabled: NO")
@@ -119,7 +116,7 @@ class DarwinToolchainConan(ConanFile):
 
         common_flags = ["-isysroot%s" % sysroot]
 
-        if self.options.catalyst != True:
+        if self.options.enable_catalyst != True:
             if self.settings.get_safe("os.version"):
                 deployment_target_flag = tools.apple_deployment_target_flag(
                     self.settings.os, self.settings.os.version
@@ -180,12 +177,14 @@ class DarwinToolchainConan(ConanFile):
         link_flags = copy.copy(common_flags)
         link_flags.append("-arch %s" % darwin_arch)
 
-        if self.options.catalyst == True:
-            cflags.extend(["-target", "x86_64-apple-ios-macabi"])
-            cflags.extend(["-miphoneos-version-min=%s" % "13.0"])
+        if self.options.enable_catalyst == True:
+            cflags.extend(["-target", "%s-apple-ios-macabi" % darwin_arch])
+            cflags.extend(["-miphoneos-version-min=%s" % self.options.catalyst_version])
 
-            link_flags.extend(["-target", "x86_64-apple-ios-macabi"])
-            link_flags.extend(["-miphoneos-version-min=%s" % "13.0"])
+            link_flags.extend(["-target", "%s-apple-ios-macabi" % darwin_arch])
+            link_flags.extend(
+                ["-miphoneos-version-min=%s" % self.options.catalyst_version]
+            )
 
         self.cpp_info.sharedlinkflags.extend(link_flags)
         self.cpp_info.exelinkflags.extend(link_flags)
@@ -210,7 +209,7 @@ class DarwinToolchainConan(ConanFile):
         self.env_info.CONAN_CMAKE_SYSTEM_NAME = self.cmake_system_name
 
         # Deployment target
-        if self.options.catalyst != True:
+        if self.options.enable_catalyst != True:
             if self.settings.get_safe("os.version"):
                 self.env_info.CONAN_CMAKE_OSX_DEPLOYMENT_TARGET = str(
                     self.settings.os.version
