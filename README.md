@@ -78,4 +78,4 @@ or
 6. Check all generated files:  
 ```find test_package/build -name hello -exec lipo -info {} \;```
 7. To install it as local package:  
-```conan export-pkg . darwin-toolchain/1.1.0@ezored/stable```
+```conan export-pkg . darwin-toolchain/1.1.0@ezored/stable -f```
