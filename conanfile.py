@@ -17,6 +17,7 @@ class DarwinToolchainConan(ConanFile):
         "enable_visibility": [True, False, None],
         "enable_catalyst": [True, False],
         "catalyst_version": "ANY",
+        "system_name": "ANY",
     }
     default_options = {
         "enable_bitcode": None,
@@ -24,6 +25,7 @@ class DarwinToolchainConan(ConanFile):
         "enable_visibility": None,
         "enable_catalyst": False,
         "catalyst_version": "13.0",
+        "system_name": "",
     }
     description = "Darwin toolchain to (cross) compile macOS/iOS/watchOS/tvOS"
     url = "https://github.com/ezored/conan-darwin-tooolchain"
@@ -32,8 +34,12 @@ class DarwinToolchainConan(ConanFile):
 
     @property
     def cmake_system_name(self):
+        if self.options.system_name != "":
+            return self.options.system_name
+
         if self.settings.os == "Macos":
-            return "macOS"
+            return "Darwin"
+
         return str(self.settings.os)
 
     @property
@@ -141,7 +147,7 @@ class DarwinToolchainConan(ConanFile):
                     self.output.info("Bitcode enabled: YES")
                 else:
                     common_flags.append("-fembed-bitcode")
-                    self.env_info.CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE = "NO"
+                    self.env_info.CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE = "YES"
                     self.output.info("Bitcode enabled: YES")
 
         # ARC
@@ -207,6 +213,7 @@ class DarwinToolchainConan(ConanFile):
         self.env_info.LDFLAGS = ldflags_str
 
         self.env_info.CONAN_CMAKE_SYSTEM_NAME = self.cmake_system_name
+        self.output.info("System name: %s" % self.env_info.CONAN_CMAKE_SYSTEM_NAME)
 
         # Deployment target
         if self.options.enable_catalyst != True:
