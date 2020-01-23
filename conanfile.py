@@ -38,7 +38,7 @@ class DarwinToolchainConan(ConanFile):
             return self.options.system_name
 
         if self.settings.os == "Macos":
-            return "macOS"
+            return "Darwin"
 
         return str(self.settings.os)
 
