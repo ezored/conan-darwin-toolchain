@@ -147,7 +147,7 @@ class DarwinToolchainConan(ConanFile):
                     self.output.info("Bitcode enabled: YES")
                 else:
                     common_flags.append("-fembed-bitcode")
-                    self.env_info.CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE = "NO"
+                    self.env_info.CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE = "YES"
                     self.output.info("Bitcode enabled: YES")
 
         # ARC
