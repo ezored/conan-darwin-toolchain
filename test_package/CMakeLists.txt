@@ -7,4 +7,3 @@ conan_basic_setup()
 add_executable(hello hello.c)
 include_directories(${CONAN_INCLUDE_DIRS})
 target_link_libraries(hello ${CONAN_LIBS})
-

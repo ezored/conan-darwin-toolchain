@@ -213,6 +213,7 @@ class DarwinToolchainConan(ConanFile):
         self.env_info.LDFLAGS = ldflags_str
 
         self.env_info.CONAN_CMAKE_SYSTEM_NAME = self.cmake_system_name
+        self.output.info("System name: %s" % self.env_info.CONAN_CMAKE_SYSTEM_NAME)
 
         # Deployment target
         if self.options.enable_catalyst != True:
