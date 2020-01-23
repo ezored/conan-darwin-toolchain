@@ -180,6 +180,8 @@ class DarwinToolchainConan(ConanFile):
         cflags.extend(["-arch", darwin_arch])
 
         self.cpp_info.cflags = cflags
+        self.cpp_info.cxxflags = cflags
+
         link_flags = copy.copy(common_flags)
         link_flags.append("-arch %s" % darwin_arch)
 
