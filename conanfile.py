@@ -15,16 +15,12 @@ class DarwinToolchainConan(ConanFile):
         "enable_bitcode": [True, False, None],
         "enable_arc": [True, False, None],
         "enable_visibility": [True, False, None],
-        "enable_catalyst": [True, False],
-        "catalyst_version": "ANY",
         "system_name": "ANY",
     }
     default_options = {
         "enable_bitcode": None,
         "enable_arc": None,
         "enable_visibility": None,
-        "enable_catalyst": False,
-        "catalyst_version": "13.0",
         "system_name": "",
     }
     description = "Darwin toolchain to (cross) compile macOS/iOS/watchOS/tvOS"
@@ -109,11 +105,6 @@ class DarwinToolchainConan(ConanFile):
     def package_info(self):
         darwin_arch = tools.to_apple_arch(self.settings.arch)
 
-        if self.options.enable_catalyst == True:
-            self.output.info("Catalyst enabled: YES")
-        else:
-            self.output.info("Catalyst enabled: NO")
-
         # Common things
         xcrun = tools.XCRun(self.settings)
         sysroot = xcrun.sdk_path
@@ -122,17 +113,16 @@ class DarwinToolchainConan(ConanFile):
 
         common_flags = ["-isysroot%s" % sysroot]
 
-        if self.options.enable_catalyst != True:
-            if self.settings.get_safe("os.version"):
-                deployment_target_flag = tools.apple_deployment_target_flag(
-                    self.settings.os, self.settings.os.version
-                )
+        if self.settings.get_safe("os.version"):
+            deployment_target_flag = tools.apple_deployment_target_flag(
+                self.settings.os, self.settings.os.version
+            )
 
-                self.output.info(
-                    "Deployment target: {0}".format(deployment_target_flag)
-                )
+            self.output.info(
+                "Deployment target: {0}".format(deployment_target_flag)
+            )
 
-                common_flags.append(deployment_target_flag)
+            common_flags.append(deployment_target_flag)
 
         # Bitcode
         if self.options.enable_bitcode == "None":
@@ -186,15 +176,6 @@ class DarwinToolchainConan(ConanFile):
         link_flags = copy.copy(common_flags)
         link_flags.append("-arch %s" % darwin_arch)
 
-        if self.options.enable_catalyst == True:
-            cflags.extend(["-target", "%s-apple-ios-macabi" % darwin_arch])
-            cflags.extend(["-miphoneos-version-min=%s" % self.options.catalyst_version])
-
-            link_flags.extend(["-target", "%s-apple-ios-macabi" % darwin_arch])
-            link_flags.extend(
-                ["-miphoneos-version-min=%s" % self.options.catalyst_version]
-            )
-
         self.cpp_info.sharedlinkflags.extend(link_flags)
         self.cpp_info.exelinkflags.extend(link_flags)
 
@@ -220,15 +201,14 @@ class DarwinToolchainConan(ConanFile):
         self.output.info("System name: %s" % self.env_info.CONAN_CMAKE_SYSTEM_NAME)
 
         # Deployment target
-        if self.options.enable_catalyst != True:
-            if self.settings.get_safe("os.version"):
-                self.env_info.CONAN_CMAKE_OSX_DEPLOYMENT_TARGET = str(
-                    self.settings.os.version
-                )
+        if self.settings.get_safe("os.version"):
+            self.env_info.CONAN_CMAKE_OSX_DEPLOYMENT_TARGET = str(
+                self.settings.os.version
+            )
 
-                self.output.info(
-                    "CMake deployment target: {0}".format(str(self.settings.os.version))
-                )
+            self.output.info(
+                "CMake deployment target: {0}".format(str(self.settings.os.version))
+            )
 
         self.env_info.CONAN_CMAKE_OSX_ARCHITECTURES = str(darwin_arch)
         self.output.info("Architecture: {0}".format(str(darwin_arch)))
