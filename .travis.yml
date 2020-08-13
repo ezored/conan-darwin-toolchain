@@ -3,7 +3,7 @@ language: generic
 osx_image: xcode11.2
 env:
    global:
-     - CONAN_REFERENCE: "darwin-toolchain/1.1.0"
+     - CONAN_REFERENCE: "darwin-toolchain/1.2.0"
      - CONAN_USERNAME: "ezored"
      - CONAN_LOGIN_USERNAME: "prsolucoes"
      - CONAN_CHANNEL: "stable"
