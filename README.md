@@ -1,7 +1,7 @@
 
 # conan-darwin-toolchain
 
-[![Build Status](https://travis-ci.com/ezored/conan-darwin-toolchain.svg?branch=stable/1.2.0)](https://travis-ci.com/ezored/conan-darwin-toolchain)
+[![Build Status](https://travis-ci.com/ezored/conan-darwin-toolchain.svg?branch=stable/1.3.0)](https://travis-ci.com/ezored/conan-darwin-toolchain)
 
 Toolchain required to cross build to any darwin platform.
 
@@ -26,7 +26,7 @@ os.version=9.0
 arch=armv7
 
 [build_requires]
-darwin-toolchain/1.2.0@ezored/stable
+darwin-toolchain/1.3.0@ezored/stable
 ```
     
 Go to your project and cross-build your dependency tree with this toolchain:
@@ -50,7 +50,7 @@ os.version=4.0
 arch=armv7
 
 [build_requires]
-darwin-toolchain/1.2.0@ezored/stable
+darwin-toolchain/1.3.0@ezored/stable
 ```
 
 ## Bitcode support
@@ -78,4 +78,4 @@ or
 6. Check all generated files:  
 ```find test_package/build -name hello -exec lipo -info {} \;```
 7. To install it as local package:  
-```conan export-pkg . darwin-toolchain/1.2.0@ezored/stable -f```
+```conan export-pkg . darwin-toolchain/1.3.0@ezored/stable -f```

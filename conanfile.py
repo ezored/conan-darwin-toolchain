@@ -1,5 +1,6 @@
 from conans import ConanFile, tools
 from conans.errors import ConanInvalidConfiguration
+from conans.client.build.compiler_flags import architecture_flag
 
 import os
 import platform
@@ -8,7 +9,7 @@ import copy
 
 class DarwinToolchainConan(ConanFile):
     name = "darwin-toolchain"
-    version = "1.2.0"
+    version = "1.3.0"
     license = "Apple"
     settings = "os", "arch", "build_type", "os_build", "compiler"
     options = {
@@ -104,6 +105,9 @@ class DarwinToolchainConan(ConanFile):
 
     def package_info(self):
         darwin_arch = tools.to_apple_arch(self.settings.arch)
+        is_catalyst = self.settings.get_safe("os.subsystem") == "catalyst"
+
+        self.output.info("Catalyst: {0}".format("YES" if is_catalyst else "NO"))
 
         # Common things
         xcrun = tools.XCRun(self.settings)
@@ -115,14 +119,21 @@ class DarwinToolchainConan(ConanFile):
 
         if self.settings.get_safe("os.version"):
             deployment_target_flag = tools.apple_deployment_target_flag(
-                self.settings.os, self.settings.os.version
+                os_=self.settings.os,
+                os_version=self.settings.os.version,
+                os_sdk=self.settings.get_safe("os.sdk"),
+                os_subsystem=self.settings.get_safe("os.subsystem"),
+                arch=self.settings.arch,
             )
 
-            self.output.info(
-                "Deployment target: {0}".format(deployment_target_flag)
-            )
+            self.output.info("Deployment target: {0}".format(deployment_target_flag))
 
             common_flags.append(deployment_target_flag)
+
+        if is_catalyst:
+            arch_flag = architecture_flag(self.settings)
+            self.output.info("Architecture flag: {0}".format(arch_flag))
+            common_flags.append(arch_flag)
 
         # Bitcode
         if self.options.enable_bitcode == "None":
@@ -167,7 +178,7 @@ class DarwinToolchainConan(ConanFile):
 
         # CMake issue, for details look https://github.com/conan-io/conan/issues/2378
         cflags = copy.copy(common_flags)
-        cflags.extend(["-arch", darwin_arch])        
+        cflags.extend(["-arch", darwin_arch])
         self.cpp_info.cflags = cflags
 
         cxxflags = copy.copy(cflags)

@@ -1,4 +1,4 @@
-from conan.packager import ConanMultiPackager
+from cpt.packager import ConanMultiPackager
 
 
 if __name__ == "__main__":
@@ -12,5 +12,13 @@ if __name__ == "__main__":
     builder.add(settings={"os": "iOS", "os.version": "9.0", "arch": "armv8.3"})
     builder.add(settings={"os": "watchOS", "os.version": "4.0", "arch": "armv7k"})
     builder.add(settings={"os": "tvOS", "os.version": "11.0", "arch": "armv8"})
+    builder.add(
+        settings={
+            "os": "Macos",
+            "arch": "x86_64",
+            "os.subsystem": "catalyst",
+            "os.version": "13.0",
+        }
+    )
 
     builder.run()
