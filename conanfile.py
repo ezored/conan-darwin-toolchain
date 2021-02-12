@@ -212,14 +212,15 @@ class DarwinToolchainConan(ConanFile):
         self.output.info("System name: %s" % self.env_info.CONAN_CMAKE_SYSTEM_NAME)
 
         # Deployment target
-        if self.settings.get_safe("os.version"):
-            self.env_info.CONAN_CMAKE_OSX_DEPLOYMENT_TARGET = str(
-                self.settings.os.version
-            )
+        if not is_catalyst:
+            if self.settings.get_safe("os.version"):
+                self.env_info.CONAN_CMAKE_OSX_DEPLOYMENT_TARGET = str(
+                    self.settings.os.version
+                )
 
-            self.output.info(
-                "CMake deployment target: {0}".format(str(self.settings.os.version))
-            )
+                self.output.info(
+                    "CMake deployment target: {0}".format(str(self.settings.os.version))
+                )
 
         self.env_info.CONAN_CMAKE_OSX_ARCHITECTURES = str(darwin_arch)
         self.output.info("Architecture: {0}".format(str(darwin_arch)))
