@@ -14,7 +14,6 @@ if __name__ == "__main__":
             "os": "Macos",
             "arch": "x86_64",
             "os.subsystem": "catalyst",
-            "os.version": "13.0",
         }
     )
     builder.add(
