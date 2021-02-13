@@ -16,37 +16,15 @@ class DarwinToolchainConan(ConanFile):
         "enable_bitcode": [True, False, None],
         "enable_arc": [True, False, None],
         "enable_visibility": [True, False, None],
-        "system_name": "ANY",
     }
     default_options = {
         "enable_bitcode": None,
         "enable_arc": None,
         "enable_visibility": None,
-        "system_name": "",
     }
     description = "Darwin toolchain to (cross) compile macOS/iOS/watchOS/tvOS"
     url = "https://github.com/ezored/conan-darwin-tooolchain"
     build_policy = "missing"
-    exports_sources = "*.cmake"
-
-    @property
-    def cmake_system_name(self):
-        if self.options.system_name != "":
-            return self.options.system_name
-
-        if self.settings.os == "Macos":
-            return "Darwin"
-
-        return str(self.settings.os)
-
-    @property
-    def cmake_system_processor(self):
-        return {
-            "x86": "i386",
-            "x86_64": "x86_64",
-            "armv7": "arm",
-            "armv8": "aarch64",
-        }.get(str(self.settings.arch))
 
     def config_options(self):
         if self.settings.os == "Macos":
@@ -104,52 +82,24 @@ class DarwinToolchainConan(ConanFile):
         self.copy("darwin-toolchain.cmake")
 
     def package_info(self):
-        darwin_arch = tools.to_apple_arch(self.settings.arch)
-        is_catalyst = self.settings.get_safe("os.subsystem") == "catalyst"
-
-        self.output.info("Catalyst: {0}".format("YES" if is_catalyst else "NO"))
-
-        # Common things
-        xcrun = tools.XCRun(self.settings)
-        sysroot = xcrun.sdk_path
-
-        self.cpp_info.sysroot = sysroot
-
-        common_flags = ["-isysroot%s" % sysroot]
-
-        if self.settings.get_safe("os.version"):
-            deployment_target_flag = tools.apple_deployment_target_flag(
-                os_=self.settings.os,
-                os_version=self.settings.os.version,
-                os_sdk=self.settings.get_safe("os.sdk"),
-                os_subsystem=self.settings.get_safe("os.subsystem"),
-                arch=self.settings.arch,
-            )
-
-            self.output.info("Deployment target: {0}".format(deployment_target_flag))
-
-            common_flags.append(deployment_target_flag)
-
-        if is_catalyst:
-            arch_flag = architecture_flag(self.settings)
-            self.output.info("Architecture flag: {0}".format(arch_flag))
-            common_flags.append(arch_flag)
+        common_flags = []
 
         # Bitcode
         if self.options.enable_bitcode == "None":
             self.output.info("Bitcode enabled: IGNORED")
         else:
             if self.options.enable_bitcode:
+                self.output.info("Bitcode enabled: YES")
+
+                self.env_info.CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE = "YES"
+                self.env_info.CMAKE_XCODE_ATTRIBUTE_BITCODE_GENERATION_MODE = "bitcode"
+
                 if self.settings.build_type == "Debug":
                     common_flags.append("-fembed-bitcode-marker")
-                    self.env_info.CMAKE_XCODE_ATTRIBUTE_BITCODE_GENERATION_MODE = (
-                        "bitcode"
-                    )
-                    self.output.info("Bitcode enabled: YES")
                 else:
                     common_flags.append("-fembed-bitcode")
-                    self.env_info.CMAKE_XCODE_ATTRIBUTE_ENABLE_BITCODE = "YES"
-                    self.output.info("Bitcode enabled: YES")
+            else:
+                self.output.info("Bitcode enabled: NO")
 
         # ARC
         if self.options.enable_arc == "None":
@@ -176,65 +126,20 @@ class DarwinToolchainConan(ConanFile):
                 self.env_info.CMAKE_XCODE_ATTRIBUTE_GCC_SYMBOLS_PRIVATE_EXTERN = "YES"
                 self.output.info("Visibility enabled: NO")
 
-        # CMake issue, for details look https://github.com/conan-io/conan/issues/2378
-        cflags = copy.copy(common_flags)
-        cflags.extend(["-arch", darwin_arch])
-        self.cpp_info.cflags = cflags
+        self.cpp_info.cflags.extend(common_flags)
+        self.cpp_info.cxxflags.extend(common_flags)
+        self.cpp_info.sharedlinkflags.extend(common_flags)
+        self.cpp_info.exelinkflags.extend(common_flags)
 
-        cxxflags = copy.copy(cflags)
-        self.cpp_info.cxxflags = cxxflags
-
-        link_flags = copy.copy(common_flags)
-        link_flags.append("-arch %s" % darwin_arch)
-
-        self.cpp_info.sharedlinkflags.extend(link_flags)
-        self.cpp_info.exelinkflags.extend(link_flags)
-
-        # Set flags in environment too, so that CMake Helper finds them
-        cflags_str = " ".join(cflags)
-        cxxflags_str = " ".join(cxxflags)
-        ldflags_str = " ".join(link_flags)
-
-        self.env_info.CC = xcrun.cc
-        self.env_info.CPP = "%s -E" % xcrun.cxx
-        self.env_info.CXX = xcrun.cxx
-        self.env_info.AR = xcrun.ar
-        self.env_info.RANLIB = xcrun.ranlib
-        self.env_info.STRIP = xcrun.strip
+        cflags_str = " ".join(self.cpp_info.cflags)
+        cxxflags_str = " ".join(self.cpp_info.cxxflags)
+        ldflags_str = " ".join(self.cpp_info.sharedlinkflags)
 
         self.env_info.CFLAGS = cflags_str
         self.env_info.ASFLAGS = cflags_str
         self.env_info.CPPFLAGS = cxxflags_str
         self.env_info.CXXFLAGS = cxxflags_str
         self.env_info.LDFLAGS = ldflags_str
-
-        self.env_info.CONAN_CMAKE_SYSTEM_NAME = self.cmake_system_name
-        self.output.info("System name: %s" % self.env_info.CONAN_CMAKE_SYSTEM_NAME)
-
-        # Deployment target
-        if not is_catalyst:
-            if self.settings.get_safe("os.version"):
-                self.env_info.CONAN_CMAKE_OSX_DEPLOYMENT_TARGET = str(
-                    self.settings.os.version
-                )
-
-                self.output.info(
-                    "CMake deployment target: {0}".format(str(self.settings.os.version))
-                )
-
-        self.env_info.CONAN_CMAKE_OSX_ARCHITECTURES = str(darwin_arch)
-        self.output.info("Architecture: {0}".format(str(darwin_arch)))
-
-        # Sysroot
-        self.env_info.CONAN_CMAKE_OSX_SYSROOT = sysroot
-        self.output.info("Sysroot: {0}".format(sysroot))
-
-        # Toolchain
-        self.env_info.CONAN_CMAKE_SYSTEM_PROCESSOR = self.cmake_system_processor
-
-        self.env_info.CONAN_CMAKE_TOOLCHAIN_FILE = os.path.join(
-            self.package_folder, "darwin-toolchain.cmake"
-        )
 
     def package_id(self):
         self.info.header_only()
