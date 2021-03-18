@@ -19,7 +19,7 @@ name: conan
 jobs:
   generate-matrix:
     name: Generate Job Matrix
-    runs-on: macos-latest
+    runs-on: ubuntu-20.04
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
