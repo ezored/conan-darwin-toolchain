@@ -16,6 +16,13 @@ on: [push, pull_request]
 
 name: conan
 
+env:
+  CONAN_REFERENCE: "darwin-toolchain/1.3.0"
+  CONAN_USERNAME: "ezored"
+  CONAN_CHANNEL: "stable"
+  CONAN_UPLOAD: "https://ezored.jfrog.io/artifactory/api/conan/ezored"
+  CONAN_STABLE_BRANCH_PATTERN: "stable/*"
+  CONAN_UPLOAD_ONLY_WHEN_STABLE: 1
 jobs:
   generate-matrix:
     name: Generate Job Matrix
@@ -68,6 +75,5 @@ jobs:
         env:
           CONAN_LOGIN_USERNAME: ${{ secrets.CONAN_LOGIN_USERNAME }}
           CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
-          CONAN_USERNAME: ezored
         run: |
           bincrafters-package-tools --auto
