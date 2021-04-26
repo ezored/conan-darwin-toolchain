@@ -45,7 +45,7 @@ jobs:
         env:
           splitByBuildTypes: ${{ env.splitByBuildTypes }}
         run: |
-          MATRIX=$(bincrafters-package-tools generate-ci-jobs --platform gha)
+          MATRIX=$(bincrafters-package-tools generate-ci-jobs --platform azp)
           echo "${MATRIX}"
           echo "::set-output name=matrix::${MATRIX}"
   conan:
