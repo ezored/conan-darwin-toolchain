@@ -24,56 +24,38 @@ env:
   CONAN_STABLE_BRANCH_PATTERN: "stable/*"
   CONAN_UPLOAD_ONLY_WHEN_STABLE: 1
 jobs:
-  generate-matrix:
-    name: Generate Job Matrix
-    runs-on: ubuntu-20.04
-    outputs:
-      matrix: ${{ steps.set-matrix.outputs.matrix }}
-    steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: "0"
-      - uses: actions/setup-python@v1
-        with:
-          python-version: "3.8"
-      - name: Install Package Tools
-        run: |
-          pip install bincrafters_package_tools
-          conan user
-      - name: Generate Job Matrix
-        id: set-matrix
-        env:
-          splitByBuildTypes: ${{ env.splitByBuildTypes }}
-        run: |
-          MATRIX=$(bincrafters-package-tools generate-ci-jobs --platform azp)
-          echo "${MATRIX}"
-          echo "::set-output name=matrix::${MATRIX}"
-  conan:
-    needs: generate-matrix
+  build:
+    name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
-      matrix: ${{fromJson(needs.generate-matrix.outputs.matrix)}}
-    name: ${{ matrix.config.name }}
+      matrix:
+        config:
+          - { name: "macOS Latest Clang", os: "macos-latest", target: "macos" }
+        python-version: [3.7]
     steps:
       - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
         with:
-          fetch-depth: "0"
-      - uses: actions/setup-python@v1
-        with:
-          python-version: "3.8"
-      - name: Install Conan
-        env:
-          BPT_MATRIX: ${{toJson(matrix.config)}}
+          python-version: ${{ matrix.python-version }}
+
+      - name: Upgrade PIP
+        run: python3 -m pip install --upgrade pip setuptools wheel
+
+      - name: Display Python version
+        run: python3 --version
+
+      - name: Display PIP version
+        run: pip3 --version
+
+      - name: Install
         run: |
-          pip install bincrafters_package_tools
-          # remove newlines from matrix first
-          matrix=$(echo ${BPT_MATRIX})
-          bincrafters-package-tools prepare-env --platform gha --config "${matrix}"
-        shell: bash
+          chmod +x .ci/install.sh
+          ./.ci/install.sh
+
       - name: Run
-        env:
-          CONAN_LOGIN_USERNAME: ${{ secrets.CONAN_LOGIN_USERNAME }}
-          CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
         run: |
-          bincrafters-package-tools --auto
+          chmod +x .ci/run.sh
+          ./.ci/run.sh
