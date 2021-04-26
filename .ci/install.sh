@@ -27,9 +27,10 @@ if [[ "$(uname -s)" == 'Darwin' ]]; then
     pyenv activate conan
 fi
 
-pip install conan --upgrade
-pip install conan_package_tools bincrafters_package_tools
+pip install --upgrade pip
+pip install conan conan_package_tools bincrafters_package_tools --upgrade
 
+conan profile new default --detect
 conan profile update settings.arch="x86_64" default
 conan profile update settings.arch_build="x86_64" default
 conan user
