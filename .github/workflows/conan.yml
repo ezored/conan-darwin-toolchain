@@ -1,0 +1,61 @@
+on: [push, pull_request]
+
+# bincrafters-conventions:gha-workflow-version:10
+# You can add custom environment variables above the version tag
+# Do not modify the tag or anything below the tag
+# This script gets automatically updated
+#
+# Possible configurations:
+# env:
+#   splitByBuildTypes: "false"  # Possible values "false", "true", default: false
+#
+# You can furthermore set any environment variable understood by Conan and Conan Package Tools
+#
+# You can also update the event triggers, which default to
+# on: [push, pull_request]
+
+name: conan
+
+env:
+  CONAN_REFERENCE: "darwin-toolchain/1.3.0"
+  CONAN_USERNAME: "ezoredrepository"
+  CONAN_CHANNEL: "stable"
+  CONAN_UPLOAD: "https://ezoredrepository.jfrog.io/artifactory/api/conan/conan-local"
+  CONAN_STABLE_BRANCH_PATTERN: "stable/*"
+  CONAN_UPLOAD_ONLY_WHEN_STABLE: 1
+jobs:
+  build:
+    name: ${{ matrix.config.name }}
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - { name: "macOS Latest Clang", os: "macos-latest", target: "macos" }
+        python-version: [3.7]
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Upgrade PIP
+        run: python3 -m pip install --upgrade pip setuptools wheel
+
+      - name: Display Python version
+        run: python3 --version
+
+      - name: Display PIP version
+        run: pip3 --version
+
+      - name: Install
+        run: |
+          chmod +x .ci/install.sh
+          ./.ci/install.sh
+
+      - name: Run
+        run: |
+          chmod +x .ci/run.sh
+          ./.ci/run.sh

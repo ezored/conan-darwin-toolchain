@@ -1,7 +1,7 @@
 
 # conan-darwin-toolchain
 
-[![Build Status](https://travis-ci.com/ezored/conan-darwin-toolchain.svg?branch=stable/1.3.0)](https://travis-ci.com/ezored/conan-darwin-toolchain)
+[![conan](https://github.com/ezored/conan-darwin-toolchain/actions/workflows/conan.yml/badge.svg)](https://github.com/ezored/conan-darwin-toolchain/actions/workflows/conan.yml)
 
 Toolchain required to cross build to any darwin platform.
 
@@ -10,6 +10,12 @@ Toolchain required to cross build to any darwin platform.
 This package **REQUIRES** Xcode to be installed.
 
 In the future, it might be added as a build_requirement.
+
+Add the following repository to conan find it:
+
+```
+conan remote add ezored https://ezoredrepository.jfrog.io/artifactory/api/conan/conan-local
+```
 
 Create a profile for cross building and including this toolchain, example:
 
