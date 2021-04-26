@@ -23,6 +23,8 @@ env:
   CONAN_UPLOAD: "https://ezoredrepository.jfrog.io/artifactory/api/conan/conan-local"
   CONAN_STABLE_BRANCH_PATTERN: "stable/*"
   CONAN_UPLOAD_ONLY_WHEN_STABLE: 1
+  CONAN_LOGIN_USERNAME: ${{ secrets.CONAN_LOGIN_USERNAME }} 
+  CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
 jobs:
   build:
     name: ${{ matrix.config.name }}
