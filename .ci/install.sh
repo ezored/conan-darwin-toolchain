@@ -30,6 +30,6 @@ fi
 pip install conan --upgrade
 pip install conan_package_tools bincrafters_package_tools
 
-conan profile update settings arch="x86_64"
-conan profile update settings arch_build="x86_64"
+conan profile update settings.arch="x86_64"
+conan profile update settings.arch_build="x86_64"
 conan user
