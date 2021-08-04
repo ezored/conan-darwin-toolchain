@@ -85,7 +85,7 @@ class DarwinToolchainConan(ConanFile):
         common_flags = []
 
         # Bitcode
-        if self.options.enable_bitcode == "None":
+        if self.options.enable_bitcode is None:
             self.output.info("Bitcode enabled: IGNORED")
         else:
             if self.options.enable_bitcode:
@@ -102,7 +102,7 @@ class DarwinToolchainConan(ConanFile):
                 self.output.info("Bitcode enabled: NO")
 
         # ARC
-        if self.options.enable_arc == "None":
+        if self.options.enable_arc is None:
             self.output.info("ObjC ARC enabled: IGNORED")
         else:
             if self.options.enable_arc:
@@ -115,7 +115,7 @@ class DarwinToolchainConan(ConanFile):
                 self.output.info("ObjC ARC enabled: NO")
 
         # Visibility
-        if self.options.enable_visibility == "None":
+        if self.options.enable_visibility is None:
             self.output.info("Visibility enabled: IGNORED")
         else:
             if self.options.enable_visibility:
