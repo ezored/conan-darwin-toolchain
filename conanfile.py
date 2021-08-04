@@ -78,9 +78,6 @@ class DarwinToolchainConan(ConanFile):
                 "watchOS: Only supported archs: [armv7k, armv8_32, x86, x86_64]"
             )
 
-    def package(self):
-        self.copy("darwin-toolchain.cmake")
-
     def package_info(self):
         common_flags = []
 
