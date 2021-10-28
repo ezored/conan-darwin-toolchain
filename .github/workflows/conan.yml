@@ -17,7 +17,7 @@ on: [push, pull_request]
 name: conan
 
 env:
-  CONAN_REFERENCE: "darwin-toolchain/1.3.0"
+  CONAN_REFERENCE: "darwin-toolchain/1.4.0"
   CONAN_USERNAME: "ezored"
   CONAN_CHANNEL: "stable"
   CONAN_UPLOAD: "https://ezoredrepository.jfrog.io/artifactory/api/conan/conan-local"

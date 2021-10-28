@@ -9,7 +9,7 @@ import copy
 
 class DarwinToolchainConan(ConanFile):
     name = "darwin-toolchain"
-    version = "1.3.0"
+    version = "1.4.0"
     license = "Apple"
     settings = "os", "arch", "build_type", "os_build", "compiler"
     options = {
