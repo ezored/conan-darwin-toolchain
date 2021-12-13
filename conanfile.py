@@ -9,7 +9,7 @@ import copy
 
 class DarwinToolchainConan(ConanFile):
     name = "darwin-toolchain"
-    version = "1.4.0"
+    version = "1.5.0"
     license = "Apple"
     settings = "os", "arch", "build_type", "os_build", "compiler"
     options = {
@@ -46,9 +46,13 @@ class DarwinToolchainConan(ConanFile):
         if self.settings.os in ["watchOS", "tvOS"] and not self.options.enable_bitcode:
             raise ConanInvalidConfiguration("Bitcode is required on watchOS/tvOS")
 
-        if self.settings.os == "Macos" and self.settings.arch not in ["x86", "x86_64"]:
+        if self.settings.os == "Macos" and self.settings.arch not in [
+            "x86",
+            "x86_64",
+            "armv8",
+        ]:
             raise ConanInvalidConfiguration(
-                "macOS: Only supported archs: [x86, x86_64]"
+                "macOS: Only supported archs: [x86, x86_64, armv8]"
             )
 
         if self.settings.os == "iOS" and self.settings.arch not in [

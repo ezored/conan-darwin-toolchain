@@ -21,7 +21,7 @@ Create a profile for cross building and including this toolchain, example:
 
 ### iOS
 
-**ios_profile**
+Create a file called **ios_profile** with content:
     
 ```
 include(default)
@@ -32,7 +32,7 @@ os.version=9.0
 arch=armv7
 
 [build_requires]
-darwin-toolchain/1.4.0@ezored/stable
+darwin-toolchain/1.5.0@ezored/stable
 ```
     
 Go to your project and cross-build your dependency tree with this toolchain:
@@ -45,18 +45,47 @@ This toolchain works with every darwin platform (macOS/iOS/tvOS/watchOS).
 
 You only need to create a slightly different profile, example:
 
-**watchos_profile**
+**watchOS**
+
 
 ```
 include(default)
 
 [settings]
-os=iOS
-os.version=4.0
-arch=armv7
+os=watchOS
+os.version=5.0
+arch=armv8_32
 
 [build_requires]
-darwin-toolchain/1.4.0@ezored/stable
+darwin-toolchain/1.5.0@ezored/stable
+```
+
+**tvOS**
+
+```
+include(default)
+
+[settings]
+os=tvOS
+os.version=11.0
+arch=armv8
+
+[build_requires]
+darwin-toolchain/1.5.0@ezored/stable
+```
+
+**macOS catalyst**
+
+```
+include(default)
+
+[settings]
+os=Macos
+os.subsystem=catalyst
+arch=x86_64
+
+[build_requires]
+darwin-toolchain/1.5.0@ezored/stable
 ```
 
 ## Bitcode support
@@ -84,4 +113,4 @@ or
 6. Check all generated files:  
 ```find test_package/build -name hello -exec lipo -info {} \;```
 7. To install it as local package:  
-```conan export-pkg . darwin-toolchain/1.4.0@ezored/stable -f```
+```conan export-pkg . darwin-toolchain/1.5.0@ezored/stable -f```
