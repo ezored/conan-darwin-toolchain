@@ -23,7 +23,7 @@ env:
   CONAN_UPLOAD: "https://ezoredrepository.jfrog.io/artifactory/api/conan/conan-local"
   CONAN_STABLE_BRANCH_PATTERN: "stable/*"
   CONAN_UPLOAD_ONLY_WHEN_STABLE: 1
-  CONAN_LOGIN_USERNAME: ${{ secrets.CONAN_LOGIN_USERNAME }} 
+  CONAN_LOGIN_USERNAME: ${{ secrets.CONAN_LOGIN_USERNAME }}
   CONAN_PASSWORD: ${{ secrets.CONAN_PASSWORD }}
 jobs:
   build:
@@ -46,18 +46,24 @@ jobs:
       - name: Upgrade PIP
         run: python3 -m pip install --upgrade pip setuptools wheel
 
-      - name: Display Python version
+      - name: Display Python Version
         run: python3 --version
 
-      - name: Display PIP version
+      - name: Display PIP Version
         run: pip3 --version
 
-      - name: Install
+      - name: Install Conan
         run: |
-          chmod +x .ci/install.sh
-          ./.ci/install.sh
+          pip install conan conan_package_tools bincrafters_package_tools --upgrade
+          conan profile new default --detect
+          conan profile update settings.arch="x86_64" default
+          conan profile update settings.arch_build="x86_64" default
+          conan user
 
-      - name: Run
+      - name: Build
         run: |
-          chmod +x .ci/run.sh
-          ./.ci/run.sh
+          python build.py
+
+      - name: Test
+        run: |
+          find test_package/build -name hello -exec lipo -info {} \;
